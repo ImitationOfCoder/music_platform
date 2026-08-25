@@ -1,0 +1,40 @@
+services:
+    api-gateway:
+        build:
+            context: .
+            dockerfile: services/api-gateway/Dockerfile.dev
+        container_name: go_music_platform_api_gateway
+        ports:
+            - "8000:8000"
+        env_file:
+            - .env
+            - ./services/api-gateway/.env
+        volumes:
+            - ./services/api-gateway:/app
+            - ./services/api-gateway/out/logs:/app/out/logs
+            - /app/tmp
+        networks:
+            - music_platform-network
+        restart: unless-stopped
+        depends_on:
+            - postgres
+
+    user-microservice:
+        build:
+            context: .
+            dockerfile: services/user/Dockerfile.dev
+        container_name: go_music_platform_user_microservice
+        ports:
+            - "8001:8000"
+        env_file:
+            - .env
+            - ./services/user/.env
+        volumes:
+            - ./services/user:/app
+            - ./services/user/out/logs:/app/out/logs
+            - /app/tmp
+        networks:
+            - music_platform-network
+        restart: unless-stopped
+        depends_on:
+            - postgres
