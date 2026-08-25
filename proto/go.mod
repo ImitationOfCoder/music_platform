@@ -1,4 +1,4 @@
-module music_platform_proto
+module github.com/ImitationOfCoder/music_platform/proto/gen/go
 
 go 1.26.7
 
