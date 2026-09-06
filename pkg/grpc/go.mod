@@ -1,4 +1,4 @@
-module github.com/ImitationOfCoder/music_platofrm/pkg/grpc
+module github.com/ImitationOfCoder/music_platform/pkg/grpc
 
 go 1.26.7
 
