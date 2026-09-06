@@ -1,0 +1,80 @@
+services:
+    api-gateway:
+        build:
+            context: .
+            dockerfile: services/api-gateway/Dockerfile.dev
+        container_name: go_music_platform_api_gateway
+        ports:
+            - "8000:8000"
+        env_file:
+            - .env
+            - ./services/api-gateway/.env
+        volumes:
+            - ./services/api-gateway:/app
+            - ./services/api-gateway/out/logs:/app/out/logs
+            - /app/tmp
+        networks:
+            - music_platform-network
+        restart: unless-stopped
+        depends_on:
+            - postgres
+
+    account-microservice:
+        build:
+            context: .
+            dockerfile: services/account/Dockerfile.dev
+        container_name: go_music_platform_account_microservice
+        ports:
+            - "4001:4001"
+        env_file:
+            - .env
+            - ./services/account/.env
+        volumes:
+            - ./services/account:/app
+            - ./services/account/out/logs:/app/out/logs
+            - /app/tmp
+        networks:
+            - music_platform-network
+        restart: unless-stopped
+        depends_on:
+            - postgres
+
+    profile-microservice:
+        build:
+            context: .
+            dockerfile: services/profile/Dockerfile.dev
+        container_name: go_music_platform_profile_microservice
+        ports:
+            - "4000:4000"
+        env_file:
+            - .env
+            - ./services/profile/.env
+        volumes:
+            - ./services/profile:/app
+            - ./services/profile/out/logs:/app/out/logs
+            - /app/tmp
+        networks:
+            - music_platform-network
+        restart: unless-stopped
+        depends_on:
+            - postgres
+
+    current-user-microservice:
+        build:
+            context: .
+            dockerfile: services/current-user/Dockerfile.dev
+        container_name: go_music_platform_current-user_microservice
+        ports:
+            - "4002:4002"
+        env_file:
+            - .env
+            - ./services/current-user/.env
+        volumes:
+            - ./services/current-user:/app
+            - ./services/current-user/out/logs:/app/out/logs
+            - /app/tmp
+        networks:
+            - music_platform-network
+        restart: unless-stopped
+        depends_on:
+            - postgres
