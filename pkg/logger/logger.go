@@ -15,13 +15,40 @@ type Logger struct {
 	file *os.File
 }
 
-func NewLoggerMust(env Env, folder string) *Logger {
-	if !env.IsValid() {
-		return nil
+func (l *Logger) With(fields ...slog.Attr) *Logger {
+	logger := l.Logger
+
+	for _, field := range fields {
+		logger = logger.With(field)
 	}
 
-	cfg := NewConfig(env, folder)
-	log, err := NewLogger(cfg)
+	return &Logger{
+		Logger: logger,
+		file:   l.file,
+	}
+}
+
+func (l *Logger) Close() {
+	if err := l.file.Close(); err != nil {
+		fmt.Println("failed to close application logger:", err)
+	}
+}
+
+func (l *Logger) Err(err error) slog.Attr {
+	return slog.Attr{
+		Key:   "error",
+		Value: slog.StringValue(err.Error()),
+	}
+}
+
+func New(env Env, folder string) *Logger {
+	cfg, err := newConfig(env, folder)
+	if err != nil {
+		fmt.Println("failed to create logger config: ", err)
+		os.Exit(1)
+	}
+
+	log, err := newLogger(cfg)
 
 	if err != nil {
 		fmt.Println("failed to init application logger:", err)
@@ -31,7 +58,7 @@ func NewLoggerMust(env Env, folder string) *Logger {
 	return log
 }
 
-func NewLogger(config *Config) (*Logger, error) {
+func newLogger(config *Config) (*Logger, error) {
 	var handler slog.Handler
 	var err error
 
@@ -93,30 +120,4 @@ func getDevHandler(writer io.Writer) *slog.JSONHandler {
 			Level: slog.LevelDebug,
 		},
 	)
-}
-
-func (l *Logger) With(fields ...slog.Attr) *Logger {
-	logger := l.Logger
-
-	for _, field := range fields {
-		logger = logger.With(field)
-	}
-
-	return &Logger{
-		Logger: logger,
-		file:   l.file,
-	}
-}
-
-func (l *Logger) Close() {
-	if err := l.file.Close(); err != nil {
-		fmt.Println("failed to close application logger:", err)
-	}
-}
-
-func (l *Logger) Err(err error) slog.Attr {
-	return slog.Attr{
-		Key:   "error",
-		Value: slog.StringValue(err.Error()),
-	}
 }

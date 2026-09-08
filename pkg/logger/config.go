@@ -1,5 +1,10 @@
 package logger
 
+import (
+	"fmt"
+	"os"
+)
+
 type Env string
 
 func (e Env) String() string {
@@ -26,9 +31,26 @@ type Config struct {
 	Folder string
 }
 
-func NewConfig(env Env, folder string) *Config {
+func newConfig(env Env, folder string) (*Config, error) {
+	if !env.IsValid() {
+		return nil, fmt.Errorf("env is invalid")
+	}
+
+	if !isValidDirectory(folder) {
+		return nil, fmt.Errorf("folder path is invalid")
+	}
+
 	return &Config{
 		Env:    env,
 		Folder: folder,
+	}, nil
+}
+
+func isValidDirectory(path string) bool {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return false
 	}
+
+	return fileInfo.IsDir()
 }
