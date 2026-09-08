@@ -34,7 +34,7 @@ func New(
 	opTimeout time.Duration,
 ) (*ConnectionPool, error) {
 	connectionString := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		user,
 		password,
 		host,
