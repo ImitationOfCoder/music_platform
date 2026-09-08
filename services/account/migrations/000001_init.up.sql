@@ -1,0 +1,3 @@
+CREATE SCHEMA IF NOT EXISTS music_platform;
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
