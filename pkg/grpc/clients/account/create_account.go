@@ -2,9 +2,9 @@ package account_grpc_client
 
 import (
 	"context"
-	"curret_user_microservice/internal/domain"
 	"fmt"
 
+	errs "github.com/ImitationOfCoder/music_platform/pkg/grpc/errors"
 	v1 "github.com/ImitationOfCoder/music_platform_proto/go"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -25,7 +25,7 @@ func (c *Client) CreateAccount(ctx context.Context, name string, email string, p
 
 		switch st.Code() {
 		case codes.AlreadyExists:
-			return domain.ErrAccountAlreadyExists
+			return errs.ErrAccountAlreadyExists
 		}
 	}
 

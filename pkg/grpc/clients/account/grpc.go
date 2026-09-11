@@ -1,8 +1,9 @@
 package account_grpc_client
 
 import (
-	"curret_user_microservice/pkg/logger"
 	"fmt"
+
+	"github.com/ImitationOfCoder/music_platform/pkg/logger"
 
 	v1 "github.com/ImitationOfCoder/music_platform_proto/go"
 	"google.golang.org/grpc"
