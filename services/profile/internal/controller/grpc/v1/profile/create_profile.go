@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"user_microservice/internal/domain"
+	"profile_microservice/internal/domain"
 
 	v1 "github.com/ImitationOfCoder/music_platform_proto/go"
 	"google.golang.org/grpc/codes"
@@ -22,8 +22,8 @@ func (s *ServerApi) CreateProfile(ctx context.Context, req *v1.CreateProfileRequ
 		req.GetName(),
 	)
 	if err != nil {
-		if errors.Is(err, domain.ErrUserAlreadyExists) {
-			return nil, status.Error(codes.AlreadyExists, "User already exists.")
+		if errors.Is(err, domain.ErrProfileAlreadyExists) {
+			return nil, status.Error(codes.AlreadyExists, "Profile already exists.")
 		}
 
 		return nil, status.Error(codes.Internal, "Internal server error.")
@@ -38,11 +38,11 @@ func validateCreateUser(req *v1.CreateProfileRequest) error {
 	name := req.GetName()
 
 	if len([]rune(name)) < 1 {
-		return fmt.Errorf("user name cannot be empty")
+		return fmt.Errorf("profile name cannot be empty")
 	}
 
 	if len([]rune(name)) > 32 {
-		return fmt.Errorf("user name length cant be greater than 32 characters")
+		return fmt.Errorf("profile name length cant be greater than 32 characters")
 	}
 
 	return nil

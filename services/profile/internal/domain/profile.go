@@ -11,12 +11,6 @@ type User struct {
 	PasswordHash string
 }
 
-type UserUninitialized struct {
-	Name     string
-	Email    string
-	Password string
-}
-
 func (u *User) Validate() error {
 	nameLength := len([]rune(u.Name))
 

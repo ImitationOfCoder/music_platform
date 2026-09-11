@@ -3,65 +3,70 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"log"
+	"math"
 	"time"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Pool interface {
-	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
-	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
-	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
-	Close()
+const (
+	_defaultMaxPoolSize  = 1
+	_defaultConnAttempts = 10
+	_defaultConnTimeout  = time.Second
+)
 
-	OpTimeout() time.Duration
+type Postgres struct {
+	maxPoolSize  int
+	connAttempts int
+	connTimeout  time.Duration
+
+	Pool *pgxpool.Pool
 }
 
-type ConnectionPool struct {
-	*pgxpool.Pool
-	opTimeout time.Duration
-}
+func New(url string, opts ...Option) (*Postgres, error) {
+	pg := &Postgres{
+		maxPoolSize:  _defaultMaxPoolSize,
+		connAttempts: _defaultConnAttempts,
+		connTimeout:  _defaultConnTimeout,
+	}
 
-func New(
-	ctx context.Context,
-	user string,
-	password string,
-	host string,
-	port int,
-	database string,
-	opTimeout time.Duration,
-) (*ConnectionPool, error) {
-	connectionString := fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		user,
-		password,
-		host,
-		port,
-		database,
-	)
+	for _, opt := range opts {
+		opt(pg)
+	}
 
-	pgxConfig, err := pgxpool.ParseConfig(connectionString)
+	poolConfig, err := pgxpool.ParseConfig(url)
 	if err != nil {
-		return nil, fmt.Errorf("parse pgx config: %w", err)
+		return nil, fmt.Errorf("postgres - New - pgxpool.ParseConfig: %w", err)
 	}
 
-	pgxPool, err := pgxpool.NewWithConfig(ctx, pgxConfig)
+	poolConfig.MaxConns = safeIntToInt32(pg.maxPoolSize)
+
+	for pg.connAttempts > 0 {
+		pg.Pool, err = pgxpool.NewWithConfig(context.Background(), poolConfig)
+		if err == nil {
+			break
+		}
+
+		log.Printf("Postgres is trying to connect, attempts left: %d", pg.connAttempts)
+
+		time.Sleep(pg.connTimeout)
+
+		pg.connAttempts--
+	}
 	if err != nil {
-		return nil, fmt.Errorf("create pgx pool: %w", err)
+		return nil, fmt.Errorf("postgres - NewPostgres - connAttempts == 0: %w", err)
 	}
 
-	if err := pgxPool.Ping(ctx); err != nil {
-		return nil, fmt.Errorf("pgx pool ping: %w", err)
-	}
-
-	return &ConnectionPool{
-		Pool:      pgxPool,
-		opTimeout: opTimeout,
-	}, nil
+	return pg, nil
 }
 
-func (p *ConnectionPool) OpTimeout() time.Duration {
-	return p.opTimeout
+func (p *Postgres) Close() {
+	if p.Pool != nil {
+		p.Pool.Close()
+	}
+}
+
+func safeIntToInt32(v int) int32 {
+	return int32(v & math.MaxInt32)
 }

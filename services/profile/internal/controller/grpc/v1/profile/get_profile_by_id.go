@@ -3,7 +3,7 @@ package profile_grpc
 import (
 	"context"
 	"errors"
-	"user_microservice/internal/domain"
+	"profile_microservice/internal/domain"
 
 	v1 "github.com/ImitationOfCoder/music_platform_proto/go"
 	"google.golang.org/grpc/codes"
@@ -13,9 +13,9 @@ import (
 func (s *ServerApi) GetProfileById(ctx context.Context, req *v1.GetProfileByIdRequest) (*v1.GetProfileByIdResponse, error) {
 	id := req.GetId()
 
-	user, err := s.profileService.GetProfileById(id)
+	profile, err := s.profileService.GetProfileById(id)
 	if err != nil {
-		if errors.Is(err, domain.ErrUserNotFound) {
+		if errors.Is(err, domain.ErrProfileNotFound) {
 			return nil, status.Error(codes.NotFound, "User not found.")
 		}
 
@@ -23,7 +23,7 @@ func (s *ServerApi) GetProfileById(ctx context.Context, req *v1.GetProfileByIdRe
 	}
 
 	return &v1.GetProfileByIdResponse{
-		Id:   user.Id,
-		Name: user.Name,
+		Id:   profile.Id,
+		Name: profile.Name,
 	}, nil
 }
