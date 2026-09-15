@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	nats_rpc "profile_microservice/pkg/nats"
+	nats_rpc "github.com/ImitationOfCoder/music_platform/pkg/nats"
 
 	"github.com/nats-io/nats.go"
 )

@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	nats_rpc "profile_microservice/pkg/nats"
 	"time"
+
+	nats_rpc "github.com/ImitationOfCoder/music_platform/pkg/nats"
 
 	"github.com/ImitationOfCoder/music_platform/pkg/logger"
 	"github.com/nats-io/nats.go"
